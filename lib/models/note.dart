@@ -1,10 +1,10 @@
-// lib/models/note.dart
+// lib/models/note.dart (Updated to use toJson/fromJson)
 
 class Note {
-  int? id;
-  String title;
-  String content;
-  DateTime date; // The date the note/list is scheduled for
+  final int? id; // Changed to final for best practice
+  final String title;
+  final String content;
+  final DateTime date;
 
   Note({
     this.id,
@@ -13,8 +13,8 @@ class Note {
     required this.date,
   });
 
-  // Convert an Note object into a Map object
-  Map<String, dynamic> toMap() {
+  // Renamed to toJson()
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'title': title,
@@ -23,13 +23,13 @@ class Note {
     };
   }
 
-  // Extract an Note object from a Map object
-  factory Note.fromMap(Map<String, dynamic> map) {
+  // Renamed to fromJson()
+  factory Note.fromJson(Map<String, dynamic> json) {
     return Note(
-      id: map['id'],
-      title: map['title'],
-      content: map['content'],
-      date: DateTime.parse(map['date']),
+      id: json['id'] as int?,
+      title: json['title'] as String,
+      content: json['content'] as String,
+      date: DateTime.parse(json['date'] as String),
     );
   }
 

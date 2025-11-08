@@ -1,16 +1,16 @@
-// lib/models/plan.dart
+// lib/models/plan.dart (Updated to use toJson/fromJson)
 
 enum PlanType { daily, weekly, monthly, custom }
 
 class Plan {
-  int? id;
-  String name;
-  PlanType type;
-  double maxAmount;
-  DateTime startDate;
-  DateTime endDate;
-  String? description;
-  bool isActive; // To determine if it's an "Ongoing" plan
+  final int? id; // Changed to final
+  final String name;
+  final PlanType type;
+  final double maxAmount;
+  final DateTime startDate;
+  final DateTime endDate;
+  final String? description;
+  final bool isActive; // Changed to final
 
   Plan({
     this.id,
@@ -23,11 +23,12 @@ class Plan {
     this.isActive = false,
   });
 
-  Map<String, dynamic> toMap() {
+  // Renamed to toJson()
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'name': name,
-      'type': type.name,
+      'type': type.name, // Using enum name (string) for storage
       'maxAmount': maxAmount,
       'startDate': startDate.toIso8601String(),
       'endDate': endDate.toIso8601String(),
@@ -36,16 +37,18 @@ class Plan {
     };
   }
 
-  factory Plan.fromMap(Map<String, dynamic> map) {
+  // Renamed to fromJson()
+  factory Plan.fromJson(Map<String, dynamic> json) {
     return Plan(
-      id: map['id'],
-      name: map['name'],
-      type: PlanType.values.firstWhere((e) => e.name == map['type']),
-      maxAmount: map['maxAmount'],
-      startDate: DateTime.parse(map['startDate']),
-      endDate: DateTime.parse(map['endDate']),
-      description: map['description'],
-      isActive: map['isActive'] == 1,
+      id: json['id'] as int?,
+      name: json['name'] as String,
+      // Find the enum value matching the stored string name
+      type: PlanType.values.firstWhere((e) => e.name == json['type'] as String),
+      maxAmount: json['maxAmount'] as double,
+      startDate: DateTime.parse(json['startDate'] as String),
+      endDate: DateTime.parse(json['endDate'] as String),
+      description: json['description'] as String?,
+      isActive: json['isActive'] == 1,
     );
   }
 

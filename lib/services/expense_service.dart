@@ -1,32 +1,61 @@
-// lib/services/expense_service.dart (PLACEHOLDER)
+import 'package:sqflite/sqflite.dart';
 import 'package:exnote/models/expense.dart';
 import 'package:exnote/services/database_service.dart';
 
 class ExpenseService {
   final DatabaseService _dbService;
+  // Define the table name for clarity and safety
+  final String _tableName = 'expenses';
 
-  // FIX: Constructor to accept DatabaseService
+  // Constructor receives the initialized database service instance
   ExpenseService(this._dbService);
 
-  // PLACEHOLDER: Define methods required by ExpenseProvider
-
+  // --- 1. CREATE (Insert) ---
   Future<int> create(Expense expense) async {
-    // Implement database insert logic here
-    return 1; // Return placeholder ID
+    final db = await _dbService.database;
+
+    // Insert the expense data. Assumes Expense model has toJson()
+    final id = await db.insert(
+      _tableName,
+      expense.toJson(),
+      conflictAlgorithm: ConflictAlgorithm.replace,
+    );
+    return id;
   }
 
+  // --- 2. READ ALL (Query) ---
   Future<List<Expense>> readAllExpenses() async {
-    // Implement database read logic here
-    return []; // Return empty list placeholder
+    final db = await _dbService.database;
+
+    // Retrieve all rows, ordered by date (most recent first)
+    final result = await db.query(
+      _tableName,
+      orderBy:
+          'date DESC', // Assuming 'date' is a TEXT column storing sortable strings
+    );
+
+    // Convert List<Map<String, dynamic>> to List<Expense>
+    return result.map((json) => Expense.fromJson(json)).toList();
   }
 
+  // --- 3. UPDATE ---
   Future<int> update(Expense expense) async {
-    // Implement database update logic here
-    return 1; // Return placeholder rows updated
+    final db = await _dbService.database;
+
+    // Update the row where the id matches the expense's id
+    return await db.update(
+      _tableName,
+      expense.toJson(),
+      where: 'id = ?',
+      whereArgs: [expense.id], // Use whereArgs to prevent SQL injection
+    );
   }
 
+  // --- 4. DELETE ---
   Future<int> delete(int id) async {
-    // Implement database delete logic here
-    return 1; // Return placeholder rows deleted
+    final db = await _dbService.database;
+
+    // Delete the row with the matching id
+    return await db.delete(_tableName, where: 'id = ?', whereArgs: [id]);
   }
 }

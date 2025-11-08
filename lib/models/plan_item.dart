@@ -1,13 +1,13 @@
-// lib/models/plan_item.dart
+// lib/models/plan_item.dart (Updated to use toJson/fromJson)
 
 class PlanItem {
-  int? id;
-  int planId; // Foreign key linking to the Plan
-  String name;
-  double amount;
-  String? description;
-  bool isCompleted;
-  int displayOrder; // To allow changing the order
+  final int? id; // Changed to final
+  final int planId;
+  final String name;
+  final double amount;
+  final String? description;
+  final bool isCompleted; // Changed to final
+  final int displayOrder;
 
   PlanItem({
     this.id,
@@ -19,27 +19,29 @@ class PlanItem {
     required this.displayOrder,
   });
 
-  Map<String, dynamic> toMap() {
+  // Renamed to toJson()
+  Map<String, dynamic> toJson() {
     return {
       'id': id,
       'planId': planId,
       'name': name,
       'amount': amount,
       'description': description,
-      'isCompleted': isCompleted ? 1 : 0,
+      'isCompleted': isCompleted ? 1 : 0, // Store bool as 1 or 0
       'displayOrder': displayOrder,
     };
   }
 
-  factory PlanItem.fromMap(Map<String, dynamic> map) {
+  // Renamed to fromJson()
+  factory PlanItem.fromJson(Map<String, dynamic> json) {
     return PlanItem(
-      id: map['id'],
-      planId: map['planId'],
-      name: map['name'],
-      amount: map['amount'],
-      description: map['description'],
-      isCompleted: map['isCompleted'] == 1,
-      displayOrder: map['displayOrder'],
+      id: json['id'] as int?,
+      planId: json['planId'] as int,
+      name: json['name'] as String,
+      amount: json['amount'] as double,
+      description: json['description'] as String?,
+      isCompleted: json['isCompleted'] == 1, // Read 1/0 as bool
+      displayOrder: json['displayOrder'] as int,
     );
   }
 
