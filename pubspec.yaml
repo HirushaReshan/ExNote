@@ -29,4 +29,3 @@ flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
   image_path: "assets/icon.png" # Path to your image file
-  min_sdk_android: 21 # Set this to the minimum SDK in your AndroidManifest.xml
