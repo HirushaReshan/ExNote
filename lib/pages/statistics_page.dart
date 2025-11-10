@@ -92,6 +92,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                         'Category Breakdown',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
+                      const SizedBox(height: 20,),
                       const Divider(),
                       ExpensePieChart(
                         categoryTotals: categoryTotals,

@@ -118,7 +118,7 @@ class _AddPlanItemModalState extends State<AddPlanItemModal> {
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Planned Amount (\$)',
+                  labelText: 'Planned Amount (Rs.)',
                   prefixIcon: Icon(Icons.money),
                 ),
                 validator: (v) => (v!.isEmpty || double.tryParse(v) == null)
@@ -184,7 +184,7 @@ class PlanItemCreationTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '\$${item.amount.toStringAsFixed(2)}',
+              'Rs.${item.amount.toStringAsFixed(2)}',
               style: const TextStyle(fontWeight: FontWeight.bold),
             ),
             IconButton(
@@ -237,7 +237,7 @@ class PlannedItemTile extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Text(
-              '\$${item.amount.toStringAsFixed(2)}',
+              'Rs.${item.amount.toStringAsFixed(2)}',
               style: TextStyle(
                 color: item.isCompleted ? Colors.green : Colors.red,
                 fontWeight: FontWeight.bold,
@@ -286,7 +286,7 @@ class PlanSummaryCard extends StatelessWidget {
             Text(plan.name, style: Theme.of(context).textTheme.headlineSmall),
             const SizedBox(height: 8),
             Text(
-              'Period: ${plan.type.name.toUpperCase()} | Budget: \$${plan.maxAmount.toStringAsFixed(2)}',
+              'Period: ${plan.type.name.toUpperCase()} | Budget: Rs.${plan.maxAmount.toStringAsFixed(2)}',
             ),
             const Divider(height: 20),
 
@@ -348,7 +348,7 @@ class _SummaryMetric extends StatelessWidget {
     return Column(
       children: [
         Text(
-          '\$${amount.toStringAsFixed(2)}',
+          'Rs.${amount.toStringAsFixed(2)}',
           style: Theme.of(context).textTheme.titleLarge?.copyWith(
             color: color,
             fontWeight: FontWeight.bold,

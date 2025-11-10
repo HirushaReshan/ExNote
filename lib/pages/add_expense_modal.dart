@@ -134,7 +134,7 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
                 controller: _amountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Amount (\$)',
+                  labelText: 'Amount (Rs.)',
                   prefixIcon: Icon(Icons.money),
                 ),
                 validator: (value) =>

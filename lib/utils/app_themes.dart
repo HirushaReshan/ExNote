@@ -30,7 +30,7 @@ class AppThemes {
       centerTitle: true,
     ),
     scaffoldBackgroundColor: Colors.grey[900],
-    cardColor: Colors.grey[800],
+    cardColor: const Color.fromARGB(255, 126, 126, 126),
     textTheme: const TextTheme(
       bodyLarge: TextStyle(color: Colors.white70),
       bodyMedium: TextStyle(color: Colors.white60),

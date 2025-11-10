@@ -28,4 +28,4 @@ flutter:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/ExNote_Logo.png" # Path to your image file
+  image_path: "lib/assets/ExNote_Logo.png" # Path to your image file

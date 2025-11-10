@@ -1,4 +1,4 @@
-// lib/widgets/expense_bar_chart.dart (FULL CODE - FIX: fl_chart 1.1.1 API)
+// lib/widgets/expense_bar_chart.dart (UPDATED)
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -10,6 +10,12 @@ class ExpenseBarChart extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
+    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+
+    // Determine bar and label color based on theme
+    final barColor = isDarkMode ? Colors.white : Theme.of(context).primaryColor;
+    final labelColor = isDarkMode ? Colors.white70 : Colors.black54;
+
     final now = DateTime.now();
     // Start 6 days ago to cover 7 days total (including today)
     final oneWeekAgo = DateTime(
@@ -36,7 +42,8 @@ class ExpenseBarChart extends StatelessWidget {
         barRods: [
           BarChartRodData(
             toY: entry.value,
-            color: Theme.of(context).primaryColor,
+            // FIX: Use the calculated barColor
+            color: barColor,
             width: 8,
             borderRadius: BorderRadius.circular(2),
           ),
@@ -47,7 +54,7 @@ class ExpenseBarChart extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.only(top: 20, right: 20, left: 10, bottom: 10),
       decoration: BoxDecoration(
-        color: Colors.black,
+        color: Colors.black, // Keep the container black for high contrast
         borderRadius: BorderRadius.circular(12),
       ),
       height: 150,
@@ -56,7 +63,6 @@ class ExpenseBarChart extends StatelessWidget {
           alignment: BarChartAlignment.spaceAround,
           maxY: maxAmount * 1.2,
 
-          // FIX 8: AxisTitles in fl_chart 1.1.1 does not take showTitles
           titlesData: FlTitlesData(
             show: true,
             topTitles: const AxisTitles(), // Empty AxisTitles to hide top
@@ -85,8 +91,9 @@ class ExpenseBarChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       days[dayIndex],
-                      style: const TextStyle(
-                        color: Colors.white70,
+                      style: TextStyle(
+                        // FIX: Use the calculated labelColor
+                        color: labelColor,
                         fontSize: 10,
                       ),
                     ),
@@ -107,7 +114,7 @@ class ExpenseBarChart extends StatelessWidget {
               getTooltipColor: (spot) => Colors.grey.withOpacity(0.5),
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
                 return BarTooltipItem(
-                  '\$${rod.toY.toStringAsFixed(2)}',
+                  'Rs.${rod.toY.toStringAsFixed(2)}',
                   const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,

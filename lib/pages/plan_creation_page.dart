@@ -153,7 +153,7 @@ class _PlanCreationPageState extends State<PlanCreationPage> {
                 controller: _maxAmountController,
                 keyboardType: TextInputType.number,
                 decoration: const InputDecoration(
-                  labelText: 'Maximum Spending Amount (\$)',
+                  labelText: 'Maximum Spending Amount (Rs.)',
                   prefixIcon: Icon(Icons.money),
                 ),
                 validator: (v) => (v!.isEmpty || double.tryParse(v) == null)

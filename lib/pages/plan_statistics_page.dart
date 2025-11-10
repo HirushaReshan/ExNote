@@ -118,7 +118,7 @@ class PlanStatisticsPage extends StatelessWidget {
                         '${expense.category} | ${DateFormat.yMd().format(expense.date)}',
                       ),
                       trailing: Text(
-                        '\$${expense.amount.toStringAsFixed(2)}',
+                        'Rs.${expense.amount.toStringAsFixed(2)}',
                         style: const TextStyle(
                           fontWeight: FontWeight.bold,
                           color: Colors.red,
@@ -163,7 +163,7 @@ class _StatRow extends StatelessWidget {
           ),
           Text(
             // FIX: Simplified the string interpolation for the amount.
-            '\$${amount.toStringAsFixed(2)}',
+            'Rs.${amount.toStringAsFixed(2)}',
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
               color: color,
               fontWeight: FontWeight.bold,

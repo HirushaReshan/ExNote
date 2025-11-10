@@ -44,7 +44,7 @@ class ExpenseItemCard extends StatelessWidget {
               ),
             ),
             Text(
-              '-\$${expense.amount.toStringAsFixed(2)}',
+              '-Rs.${expense.amount.toStringAsFixed(2)}',
               style: Theme.of(context).textTheme.titleLarge?.copyWith(
                 color: Colors.redAccent,
                 fontWeight: FontWeight.bold,

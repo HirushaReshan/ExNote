@@ -51,7 +51,7 @@ class PlanHistoryTile extends StatelessWidget {
         ),
         title: Text(plan.name, style: Theme.of(context).textTheme.titleMedium),
         subtitle: Text(
-          'Budget: \$${plan.maxAmount.toStringAsFixed(2)}\nPeriod: ${DateFormat.yMd().format(plan.startDate)} - ${DateFormat.yMd().format(plan.endDate)}',
+          'Budget: Rs.${plan.maxAmount.toStringAsFixed(2)}\nPeriod: ${DateFormat.yMd().format(plan.startDate)} - ${DateFormat.yMd().format(plan.endDate)}',
         ),
         isThreeLine: true,
         trailing: PopupMenuButton<String>(
