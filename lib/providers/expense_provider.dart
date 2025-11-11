@@ -1,23 +1,21 @@
+// lib/providers/expense_provider.dart (FULL CODE)
 import 'package:flutter/material.dart';
 import 'package:exnote/models/expense.dart';
 import 'package:exnote/services/database_service.dart';
 import 'package:exnote/services/expense_service.dart';
 
 class ExpenseProvider with ChangeNotifier {
-  // FIX: Service is now initialized with the injected DatabaseService
   final ExpenseService _expenseService;
   List<Expense> _expenses = [];
 
   List<Expense> get expenses => _expenses;
 
-  // FIX: Constructor now requires DatabaseService instance
+  // Constructor now requires DatabaseService instance
   ExpenseProvider(DatabaseService dbService)
     : _expenseService = ExpenseService(dbService) {
-    // Assume ExpenseService accepts dbService
     loadExpenses();
   }
 
-  // FIX 1: Make loadExpenses public
   Future<void> loadExpenses() async {
     _expenses = await _expenseService.readAllExpenses();
     notifyListeners();
@@ -56,7 +54,7 @@ class ExpenseProvider with ChangeNotifier {
     }).toList();
   }
 
-  // FIX 2: Make readExpensesByDateRange public
+  // Read expenses within a date range (inclusive)
   List<Expense> readExpensesByDateRange(DateTime start, DateTime end) {
     // Normalize dates to include the entire end day
     final normalizedStart = DateTime(start.year, start.month, start.day);
@@ -121,5 +119,45 @@ class ExpenseProvider with ChangeNotifier {
       }
     }
     return dailyTotals;
+  }
+
+  // NEW: Function to get Line Chart data (Monthly Totals for the last N months)
+  Map<DateTime, double> getMonthlyTotalsForRange(int months) {
+    final Map<DateTime, double> monthlyTotals = {};
+    final now = DateTime.now();
+
+    // Initialize the last 'months' number of months to 0.0
+    for (int i = 0; i < months; i++) {
+      // Get the start of the month, 'i' months ago
+      final date = DateTime(now.year, now.month - i, 1);
+      // Ensure the date is valid (e.g., handles year rollover)
+      final startOfMonth = DateTime(date.year, date.month, 1);
+      monthlyTotals[startOfMonth] = 0.0;
+    }
+
+    // Populate with actual expense totals
+    for (var expense in _expenses) {
+      // Get the start of the month for the expense date
+      final expenseMonthStart = DateTime(
+        expense.date.year,
+        expense.date.month,
+        1,
+      );
+
+      // Check if the expense falls within the last 'months' range
+      if (monthlyTotals.containsKey(expenseMonthStart)) {
+        monthlyTotals.update(
+          expenseMonthStart,
+          (value) => value + expense.amount,
+          ifAbsent: () => expense.amount,
+        );
+      }
+    }
+
+    // Sort by date (oldest first) for correct chart plotting
+    final sortedEntries = monthlyTotals.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    return Map.fromEntries(sortedEntries);
   }
 }

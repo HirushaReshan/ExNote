@@ -37,15 +37,20 @@ class ExpenseBarChart extends StatelessWidget {
       // Map the date to an integer index (0 to 6) for the x-axis
       final index = entry.key.difference(oneWeekAgo).inDays;
 
+      // NEW: Add a "small amount top of the bar" via the tooltip,
+      // which is the simplest non-custom painting way in fl_chart.
+      final amount = entry.value;
+
       return BarChartGroupData(
         x: index,
         barRods: [
           BarChartRodData(
-            toY: entry.value,
-            // FIX: Use the calculated barColor
+            toY: amount,
             color: barColor,
             width: 8,
             borderRadius: BorderRadius.circular(2),
+            // NEW: Use rodStackItems to reserve space for a potential label/tooltip,
+            // though not directly used for persistent labels in this simple approach.
           ),
         ],
       );
@@ -91,11 +96,7 @@ class ExpenseBarChart extends StatelessWidget {
                     padding: const EdgeInsets.only(top: 8.0),
                     child: Text(
                       days[dayIndex],
-                      style: TextStyle(
-                        // FIX: Use the calculated labelColor
-                        color: labelColor,
-                        fontSize: 10,
-                      ),
+                      style: TextStyle(color: labelColor, fontSize: 10),
                     ),
                   );
                 },
@@ -108,16 +109,26 @@ class ExpenseBarChart extends StatelessWidget {
           borderData: FlBorderData(show: false),
           barGroups: barGroups,
 
+          // UPDATED: BarTouchData to show amount on touch/hover
           barTouchData: BarTouchData(
             enabled: true,
             touchTooltipData: BarTouchTooltipData(
-              getTooltipColor: (spot) => Colors.grey.withOpacity(0.5),
+              // NEW: Use primary color with opacity for tooltips
+              getTooltipColor: (spot) =>
+                  Theme.of(context).primaryColor.withOpacity(0.8),
+              tooltipBorder: const BorderSide(color: Colors.white, width: 0.5),
+              tooltipPadding: const EdgeInsets.symmetric(
+                vertical: 2,
+                horizontal: 6,
+              ),
               getTooltipItem: (group, groupIndex, rod, rodIndex) {
+                // NEW: Tooltip only shows the amount in a small, white text
                 return BarTooltipItem(
-                  'Rs.${rod.toY.toStringAsFixed(2)}',
+                  'Rs.${rod.toY.toStringAsFixed(0)}', // Show amount without decimals
                   const TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
+                    fontSize: 10, // Small font size
                   ),
                 );
               },
