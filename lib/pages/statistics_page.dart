@@ -1,11 +1,10 @@
-// lib/pages/statistics_page.dart (UPDATED)
+// lib/pages/statistics_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:exnote/models/expense.dart';
 import 'package:exnote/providers/expense_provider.dart';
 import 'package:exnote/widgets/expense_bar_chart.dart';
 import 'package:exnote/widgets/expense_pie_chart.dart';
-// NEW IMPORT: Import the new Line Chart
 import 'package:exnote/widgets/expense_line_chart.dart';
 
 enum StatFilter { daily, weekly, monthly }
@@ -21,7 +20,6 @@ class _StatisticsPageState extends State<StatisticsPage> {
   StatFilter _currentFilter = StatFilter.monthly;
 
   List<Expense> _getFilteredExpenses(ExpenseProvider provider) {
-    // ... (Keep existing implementation of _getFilteredExpenses as is)
     final now = DateTime.now();
     if (_currentFilter == StatFilter.daily) {
       return provider.getDailyExpenses(now);
@@ -56,15 +54,11 @@ class _StatisticsPageState extends State<StatisticsPage> {
             (sum, item) => sum + item.amount,
           );
 
-          // Data for the NEW Line Chart (Last 6 months)
-          final monthlyTotals = expenseProvider.getMonthlyTotalsForRange(6);
-
           return ListView(
             padding: const EdgeInsets.all(16.0),
             children: [
-              // --- 1. Filter Toggle ---
+              // --- 1. Filter Toggle (For Pie Chart) ---
               SegmentedButton<StatFilter>(
-                // ... (Keep SegmentedButton as is)
                 segments: const <ButtonSegment<StatFilter>>[
                   ButtonSegment<StatFilter>(
                     value: StatFilter.daily,
@@ -96,7 +90,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Category Breakdown',
+                        'Category Breakdown (${_currentFilter.name.toUpperCase()})',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const SizedBox(height: 20),
@@ -111,7 +105,7 @@ class _StatisticsPageState extends State<StatisticsPage> {
               ),
               const SizedBox(height: 20),
 
-              // --- NEW CHART: Monthly Spending Trend (Line Chart) ---
+              // --- NEW CHART: Spending Trend (Line Chart with internal filter) ---
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -119,21 +113,19 @@ class _StatisticsPageState extends State<StatisticsPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Monthly Spending Trend (Last 6 Months)',
+                        'Spending Trend',
                         style: Theme.of(context).textTheme.titleLarge,
                       ),
                       const Divider(),
-                      // NEW WIDGET
-                      ExpenseLineChart(monthlyTotals: monthlyTotals),
+                      // Uses internal filters (7 Days/6 Weeks/6 Months)
+                      const ExpenseLineChart(),
                     ],
                   ),
                 ),
               ),
               const SizedBox(height: 20),
 
-              // --- 3. Economy/Comparison Chart (Bar Chart for Weekly Comparison) ---
-              // NOTE: The title is changed from 'Monthly Spending Comparison' to reflect
-              // the actual data (Last 7 Days) in ExpenseBarChart.
+              // --- 3. Economy/Comparison Chart (Bar Chart for Daily Comparison) ---
               Card(
                 child: Padding(
                   padding: const EdgeInsets.all(16.0),

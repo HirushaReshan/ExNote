@@ -8,7 +8,6 @@ import 'package:exnote/models/plan.dart';
 import 'package:exnote/providers/expense_provider.dart';
 import 'package:exnote/providers/plan_provider.dart';
 import 'package:exnote/widgets/expense_pie_chart.dart';
-import 'package:exnote/widgets/plan_widgets.dart'; // For PlanSummaryCard
 
 class PlanStatisticsPage extends StatelessWidget {
   final Plan plan;

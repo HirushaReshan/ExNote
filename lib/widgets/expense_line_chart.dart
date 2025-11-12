@@ -1,163 +1,229 @@
-// lib/widgets/expense_line_chart.dart (NEW FILE)
+// lib/widgets/expense_line_chart.dart
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:intl/intl.dart';
+import 'package:exnote/providers/expense_provider.dart';
 
-class ExpenseLineChart extends StatelessWidget {
-  final Map<DateTime, double> monthlyTotals;
+enum LineChartFilter { daily, weekly, monthly }
 
-  const ExpenseLineChart({super.key, required this.monthlyTotals});
+class ExpenseLineChart extends StatefulWidget {
+  const ExpenseLineChart({super.key});
+
+  @override
+  State<ExpenseLineChart> createState() => _ExpenseLineChartState();
+}
+
+class _ExpenseLineChartState extends State<ExpenseLineChart> {
+  LineChartFilter _currentFilter = LineChartFilter.monthly;
+
+  // Helper to get the correct data based on the filter
+  Map<DateTime, double> _getChartData(ExpenseProvider provider) {
+    final now = DateTime.now();
+    const daysToShow = 7; // Range for daily view
+
+    if (_currentFilter == LineChartFilter.daily) {
+      final start = now.subtract(const Duration(days: daysToShow - 1));
+      return provider.getDailyTotalsForRange(start, now);
+    } else if (_currentFilter == LineChartFilter.weekly) {
+      // Show totals for the last 6 weeks (requires update in provider)
+      return provider.getWeeklyTotalsForRange(6);
+    } else {
+      // Show totals for the last 6 months
+      return provider.getMonthlyTotalsForRange(6);
+    }
+  }
+
+  // Helper to get the appropriate title for the X-axis
+  String _getTitle(DateTime date) {
+    if (_currentFilter == LineChartFilter.daily) {
+      return DateFormat('E').format(date); // e.g., Mon, Tue
+    } else if (_currentFilter == LineChartFilter.weekly) {
+      return DateFormat('MMM dd').format(date); // Start date of the week
+    } else {
+      return DateFormat('MMM yy').format(date); // e.g., Jan 25
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    if (monthlyTotals.isEmpty || monthlyTotals.values.every((v) => v == 0)) {
-      return const Center(child: Text("No monthly data available."));
-    }
+    return Consumer<ExpenseProvider>(
+      builder: (context, expenseProvider, child) {
+        final data = _getChartData(expenseProvider);
 
-    // Assign integer index (0, 1, 2...) for the x-axis
-    final List<MapEntry<DateTime, double>> sortedData = monthlyTotals.entries
-        .toList();
-
-    // Find the maximum amount for scaling the graph
-    final maxAmount = monthlyTotals.values.reduce((a, b) => a > b ? a : b);
-
-    // Prepare FlSpot data
-    List<FlSpot> spots = sortedData.asMap().entries.map((entry) {
-      // entry.key is the index (0, 1, 2...)
-      // entry.value.value is the total amount
-      return FlSpot(entry.key.toDouble(), entry.value.value);
-    }).toList();
-
-    // Determine line color and label color based on theme
-    final isDarkMode = Theme.of(context).brightness == Brightness.dark;
-    final primaryColor = Theme.of(context).primaryColor;
-    final lineColor = primaryColor;
-    final gridColor = isDarkMode
-        ? Colors.white10
-        : Colors.grey.withOpacity(0.3);
-    final labelColor = isDarkMode ? Colors.white70 : Colors.black54;
-
-    return Container(
-      padding: const EdgeInsets.only(top: 10, right: 20, left: 10, bottom: 10),
-      height: 200,
-      child: LineChart(
-        LineChartData(
-          gridData: FlGridData(
-            show: true,
-            drawVerticalLine: false,
-            horizontalInterval: maxAmount / 5, // Show 5 horizontal lines
-            getDrawingHorizontalLine: (value) {
-              return FlLine(color: gridColor, strokeWidth: 0.5);
-            },
-          ),
-          titlesData: FlTitlesData(
-            show: true,
-            topTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            rightTitles: const AxisTitles(
-              sideTitles: SideTitles(showTitles: false),
-            ),
-            leftTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                getTitlesWidget: (value, meta) {
-                  // Format the amount for the Y-axis labels
-                  return Text(
-                    '${value.toInt()}',
-                    style: TextStyle(color: labelColor, fontSize: 10),
-                  );
-                },
-                reservedSize: 40,
-                interval: maxAmount / 5,
+        if (data.isEmpty || data.values.every((v) => v == 0)) {
+          return Column(
+            children: [
+              _buildFilterButtons(),
+              const Expanded(
+                child: Center(
+                  child: Text("No expense data available for this period."),
+                ),
               ),
-            ),
-            bottomTitles: AxisTitles(
-              sideTitles: SideTitles(
-                showTitles: true,
-                reservedSize: 30,
-                interval: 1,
-                getTitlesWidget: (value, meta) {
-                  // Convert index (value) back to month name
-                  final index = value.toInt();
-                  if (index >= 0 && index < sortedData.length) {
-                    final month = sortedData[index].key.month;
-                    final year =
-                        sortedData[index].key.year %
-                        100; // Last two digits of year
-                    final monthName = _getMonthAbbreviation(month);
-                    return Padding(
-                      padding: const EdgeInsets.only(top: 8.0),
-                      child: Text(
-                        '$monthName\'$year',
-                        style: TextStyle(color: labelColor, fontSize: 10),
+            ],
+          );
+        }
+
+        final sortedData = data.entries.toList();
+        final maxAmount = data.values.reduce((a, b) => a > b ? a : b);
+
+        List<FlSpot> spots = sortedData.asMap().entries.map((entry) {
+          return FlSpot(entry.key.toDouble(), entry.value.value);
+        }).toList();
+
+        // Theming
+        final isDarkMode = Theme.of(context).brightness == Brightness.dark;
+        // FIX: Use Colors.white in Dark Mode
+        final lineColor = isDarkMode
+            ? Colors.white
+            : Theme.of(context).primaryColor;
+        final gridColor = isDarkMode
+            ? Colors.white10
+            : Colors.grey.withOpacity(0.3);
+        final labelColor = isDarkMode ? Colors.white70 : Colors.black54;
+
+        return Column(
+          children: [
+            // 1. Filter Buttons
+            _buildFilterButtons(),
+
+            // 2. The Chart
+            Container(
+              padding: const EdgeInsets.only(
+                top: 10,
+                right: 20,
+                left: 10,
+                bottom: 10,
+              ),
+              height: 200,
+              child: LineChart(
+                LineChartData(
+                  gridData: FlGridData(
+                    show: true,
+                    drawVerticalLine: false,
+                    horizontalInterval: maxAmount / 5,
+                    getDrawingHorizontalLine: (value) {
+                      return FlLine(color: gridColor, strokeWidth: 0.5);
+                    },
+                  ),
+                  titlesData: FlTitlesData(
+                    show: true,
+                    topTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    rightTitles: const AxisTitles(
+                      sideTitles: SideTitles(showTitles: false),
+                    ),
+                    leftTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        getTitlesWidget: (value, meta) {
+                          return Text(
+                            '${value.toInt()}',
+                            style: TextStyle(color: labelColor, fontSize: 10),
+                          );
+                        },
+                        reservedSize: 40,
+                        interval: maxAmount / 5,
                       ),
-                    );
-                  }
-                  return const Text('');
-                },
-              ),
-            ),
-          ),
-          borderData: FlBorderData(
-            show: true,
-            border: Border(
-              bottom: BorderSide(color: gridColor, width: 1),
-              left: const BorderSide(color: Colors.transparent),
-              right: const BorderSide(color: Colors.transparent),
-              top: const BorderSide(color: Colors.transparent),
-            ),
-          ),
-          minX: 0,
-          maxX: (sortedData.length - 1).toDouble(),
-          minY: 0,
-          maxY: maxAmount * 1.1, // 10% padding on top
-          lineBarsData: [
-            LineChartBarData(
-              spots: spots,
-              isCurved: true,
-              color: lineColor,
-              barWidth: 3,
-              isStrokeCapRound: true,
-              dotData: const FlDotData(show: false),
-              belowBarData: BarAreaData(
-                show: true,
-                color: lineColor.withOpacity(0.3),
+                    ),
+                    bottomTitles: AxisTitles(
+                      sideTitles: SideTitles(
+                        showTitles: true,
+                        reservedSize: 30,
+                        interval: _currentFilter == LineChartFilter.monthly
+                            ? 1
+                            : null, // Show all labels for Daily/Weekly
+                        getTitlesWidget: (value, meta) {
+                          final index = value.toInt();
+                          if (index >= 0 && index < sortedData.length) {
+                            final date = sortedData[index].key;
+                            return Padding(
+                              padding: const EdgeInsets.only(top: 8.0),
+                              child: Text(
+                                _getTitle(date),
+                                style: TextStyle(
+                                  color: labelColor,
+                                  fontSize: 10,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            );
+                          }
+                          return const Text('');
+                        },
+                      ),
+                    ),
+                  ),
+                  borderData: FlBorderData(
+                    show: true,
+                    border: Border(
+                      bottom: BorderSide(color: gridColor, width: 1),
+                      left: const BorderSide(color: Colors.transparent),
+                      right: const BorderSide(color: Colors.transparent),
+                      top: const BorderSide(color: Colors.transparent),
+                    ),
+                  ),
+                  minX: 0,
+                  maxX: (sortedData.length - 1).toDouble(),
+                  minY: 0,
+                  maxY: maxAmount * 1.1,
+                  lineBarsData: [
+                    LineChartBarData(
+                      spots: spots,
+                      isCurved: true,
+                      color: lineColor,
+                      barWidth: 3,
+                      isStrokeCapRound: true,
+                      dotData: const FlDotData(show: false),
+                      belowBarData: BarAreaData(
+                        show: true,
+                        color: lineColor.withOpacity(0.3),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
-        ),
-      ),
+        );
+      },
     );
   }
 
-  String _getMonthAbbreviation(int month) {
-    switch (month) {
-      case 1:
-        return 'Jan';
-      case 2:
-        return 'Feb';
-      case 3:
-        return 'Mar';
-      case 4:
-        return 'Apr';
-      case 5:
-        return 'May';
-      case 6:
-        return 'Jun';
-      case 7:
-        return 'Jul';
-      case 8:
-        return 'Aug';
-      case 9:
-        return 'Sep';
-      case 10:
-        return 'Oct';
-      case 11:
-        return 'Nov';
-      case 12:
-        return 'Dec';
-      default:
-        return '';
-    }
+  Widget _buildFilterButtons() {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8.0),
+      child: SegmentedButton<LineChartFilter>(
+        segments: const <ButtonSegment<LineChartFilter>>[
+          ButtonSegment<LineChartFilter>(
+            value: LineChartFilter.daily,
+            label: Text('7 Days'),
+          ),
+          ButtonSegment<LineChartFilter>(
+            value: LineChartFilter.weekly,
+            label: Text('6 Weeks'),
+          ),
+          ButtonSegment<LineChartFilter>(
+            value: LineChartFilter.monthly,
+            label: Text('6 Months'),
+          ),
+        ],
+        selected: <LineChartFilter>{_currentFilter},
+        onSelectionChanged: (Set<LineChartFilter> newSelection) {
+          setState(() {
+            _currentFilter = newSelection.first;
+          });
+        },
+        style: ButtonStyle(
+          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          visualDensity: VisualDensity.compact,
+          textStyle: MaterialStateProperty.all(const TextStyle(fontSize: 12)),
+          padding: MaterialStateProperty.all(
+            const EdgeInsets.symmetric(horizontal: 8, vertical: 0),
+          ),
+        ),
+      ),
+    );
   }
 }

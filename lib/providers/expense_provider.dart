@@ -1,4 +1,4 @@
-// lib/providers/expense_provider.dart (FULL CODE)
+// lib/providers/expense_provider.dart
 import 'package:flutter/material.dart';
 import 'package:exnote/models/expense.dart';
 import 'package:exnote/services/database_service.dart';
@@ -121,30 +121,72 @@ class ExpenseProvider with ChangeNotifier {
     return dailyTotals;
   }
 
-  // NEW: Function to get Line Chart data (Monthly Totals for the last N months)
-  Map<DateTime, double> getMonthlyTotalsForRange(int months) {
-    final Map<DateTime, double> monthlyTotals = {};
+  // NEW: Function to get Line Chart data (Weekly Totals for the last N weeks)
+  Map<DateTime, double> getWeeklyTotalsForRange(int weeks) {
+    final Map<DateTime, double> weeklyTotals = {};
     final now = DateTime.now();
 
-    // Initialize the last 'months' number of months to 0.0
-    for (int i = 0; i < months; i++) {
-      // Get the start of the month, 'i' months ago
-      final date = DateTime(now.year, now.month - i, 1);
-      // Ensure the date is valid (e.g., handles year rollover)
-      final startOfMonth = DateTime(date.year, date.month, 1);
-      monthlyTotals[startOfMonth] = 0.0;
+    // Find the start of the current week (Monday)
+    DateTime startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    startOfWeek = DateTime(
+      startOfWeek.year,
+      startOfWeek.month,
+      startOfWeek.day,
+    );
+
+    // Initialize the last 'weeks' number of weeks to 0.0
+    for (int i = 0; i < weeks; i++) {
+      final weekStart = startOfWeek.subtract(Duration(days: i * 7));
+      weeklyTotals[weekStart] = 0.0;
     }
 
     // Populate with actual expense totals
     for (var expense in _expenses) {
-      // Get the start of the month for the expense date
+      // Find the start date of the week for the expense date
+      DateTime expenseWeekStart = expense.date.subtract(
+        Duration(days: expense.date.weekday - 1),
+      );
+      expenseWeekStart = DateTime(
+        expenseWeekStart.year,
+        expenseWeekStart.month,
+        expenseWeekStart.day,
+      );
+
+      // Check if the expense falls within the last 'weeks' range keys
+      if (weeklyTotals.containsKey(expenseWeekStart)) {
+        weeklyTotals.update(
+          expenseWeekStart,
+          (value) => value + expense.amount,
+          ifAbsent: () => expense.amount,
+        );
+      }
+    }
+
+    // Sort by date (oldest first) for correct chart plotting
+    final sortedEntries = weeklyTotals.entries.toList()
+      ..sort((a, b) => a.key.compareTo(b.key));
+
+    return Map.fromEntries(sortedEntries);
+  }
+
+  // Existing: Function to get Line Chart data (Monthly Totals for the last N months)
+  Map<DateTime, double> getMonthlyTotalsForRange(int months) {
+    final Map<DateTime, double> monthlyTotals = {};
+    final now = DateTime.now();
+
+    for (int i = 0; i < months; i++) {
+      final date = DateTime(now.year, now.month - i, 1);
+      final startOfMonth = DateTime(date.year, date.month, 1);
+      monthlyTotals[startOfMonth] = 0.0;
+    }
+
+    for (var expense in _expenses) {
       final expenseMonthStart = DateTime(
         expense.date.year,
         expense.date.month,
         1,
       );
 
-      // Check if the expense falls within the last 'months' range
       if (monthlyTotals.containsKey(expenseMonthStart)) {
         monthlyTotals.update(
           expenseMonthStart,
@@ -154,7 +196,6 @@ class ExpenseProvider with ChangeNotifier {
       }
     }
 
-    // Sort by date (oldest first) for correct chart plotting
     final sortedEntries = monthlyTotals.entries.toList()
       ..sort((a, b) => a.key.compareTo(b.key));
 

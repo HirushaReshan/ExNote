@@ -1,4 +1,4 @@
-// lib/widgets/expense_pie_chart.dart (UPDATED)
+// lib/widgets/expense_pie_chart.dart
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 
@@ -18,7 +18,6 @@ class ExpensePieChart extends StatelessWidget {
       return const Center(child: Text("No data to show for this period."));
     }
 
-    // Assign colors to categories (you'd ideally map colors consistently)
     final List<Color> colors = [
       Colors.red,
       Colors.blue,
@@ -33,23 +32,22 @@ class ExpensePieChart extends StatelessWidget {
 
     List<PieChartSectionData> sections = categoryTotals.entries.map((entry) {
       final percentage = (entry.value / totalAmount) * 100;
-      final amount = entry.value; // Get the raw amount
+      final amount = entry.value; 
       final color = colors[colorIndex % colors.length];
       colorIndex++;
 
-      // NEW: Show Amount and Percentage in the title
       final titleText =
           'Rs.${amount.toStringAsFixed(0)}\n${percentage.toStringAsFixed(1)}%';
 
       return PieChartSectionData(
         color: color,
         value: entry.value,
-        title: titleText, // UPDATED title
+        title: titleText,
         radius: 60,
         titleStyle: const TextStyle(
           fontSize: 12,
           fontWeight: FontWeight.bold,
-          color: Colors.black, // Use a contrasting color
+          color: Colors.black, 
         ),
       );
     }).toList();
@@ -68,10 +66,11 @@ class ExpensePieChart extends StatelessWidget {
           ),
         ),
         const SizedBox(height: 16),
-        // UPDATED: Increased spacing in Wrap
+        // FIX: Increased spacing to prevent overlap
         Wrap(
-          spacing: 16.0, // Increased spacing
-          runSpacing: 8.0, // Increased run spacing
+          spacing: 24.0, 
+          runSpacing: 12.0, 
+          alignment: WrapAlignment.center, // Center the legend
           children: categoryTotals.entries.map((entry) {
             final color =
                 colors[categoryTotals.keys.toList().indexOf(entry.key) %
@@ -84,9 +83,9 @@ class ExpensePieChart extends StatelessWidget {
                   height: 10,
                   color: color,
                   margin: const EdgeInsets.only(right: 4),
-                ), // Added margin
+                ), 
                 Text(
-                  '${entry.key}: Rs.${entry.value.toStringAsFixed(2)}', // Optional: Show amount here too
+                  '${entry.key}',
                   style: Theme.of(context).textTheme.bodySmall,
                 ),
               ],
