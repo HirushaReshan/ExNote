@@ -1,4 +1,3 @@
-// lib/pages/statistics_page.dart
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:exnote/models/expense.dart';

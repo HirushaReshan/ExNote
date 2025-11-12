@@ -1,8 +1,8 @@
-// lib/models/expense.dart (CONVENTIONALLY NAMED & IMMUTABLE READY)
+// lib/models/expense.dart (FIXED)
 class Expense {
-  final int? id; // Use final for immutability
+  final int? id; 
   final String name;
-  final double amount;
+  final double amount; // Corrected: Must be double
   final String category;
   final DateTime date;
   final String? description;
@@ -17,7 +17,6 @@ class Expense {
   });
 
   // --- 1. toJson (WRITE to DB) ---
-  // Conventionally named 'toJson' to convert the object into a Map for storage.
   Map<String, dynamic> toJson() {
     return {
       'id': id,
@@ -31,12 +30,13 @@ class Expense {
   }
 
   // --- 2. fromJson (READ from DB) ---
-  // Conventionally named 'fromJson' to create an object from a database Map.
+  // FIX: Safely cast the 'amount' from dynamic (int or double) to double.
   factory Expense.fromJson(Map<String, dynamic> json) {
     return Expense(
       id: json['id'] as int?,
       name: json['name'] as String,
-      amount: json['amount'] as double,
+      // FIX HERE: Use .toDouble() after casting to num to handle int or double from DB
+      amount: (json['amount'] as num).toDouble(), 
       category: json['category'] as String,
       // Parse the stored TEXT date string back into a DateTime object
       date: DateTime.parse(json['date'] as String),
@@ -45,7 +45,6 @@ class Expense {
   }
 
   // --- 3. copyWith (STATE MANAGEMENT HELPER) ---
-  // Creates a new instance of Expense, allowing specific fields to be changed.
   Expense copyWith({
     int? id,
     String? name,

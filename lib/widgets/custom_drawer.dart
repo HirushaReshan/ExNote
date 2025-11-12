@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:exnote/pages/settings_page.dart';
 import 'package:exnote/providers/theme_provider.dart';
-import 'package:exnote/pages/instruction_page.dart'; // NEW IMPORT
+import 'package:exnote/pages/instruction_page.dart';
 
 // --- HELPER WIDGET FOR THE SHAPED HEADER ---
 class DrawerClipper extends CustomClipper<Path> {

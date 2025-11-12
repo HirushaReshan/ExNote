@@ -1,4 +1,4 @@
-// lib/pages/add_expense_modal.dart (UPDATED)
+// lib/pages/add_expense_modal.dart (FIXED CODE)
 
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -56,6 +56,7 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
     final expense = widget.expenseToEdit;
 
     _nameController = TextEditingController(text: expense?.name ?? '');
+    // Ensure the initial amount is a string representation of the number
     _amountController = TextEditingController(
       text: expense?.amount.toString() ?? '',
     );
@@ -74,14 +75,19 @@ class _AddExpenseModalState extends State<AddExpenseModal> {
     super.dispose();
   }
 
-  // NEW: Function to add amount increment
+  // FIXED: Function to add amount increment with correct decimal handling
   void _addAmount(int increment) {
     setState(() {
       double currentAmount = double.tryParse(_amountController.text) ?? 0.0;
       currentAmount += increment;
-      _amountController.text = currentAmount.toStringAsFixed(
-        0,
-      ); // Display as integer if possible
+
+      // Check if the result is a whole number to display it as an integer,
+      // otherwise, display the full decimal value.
+      if (currentAmount == currentAmount.roundToDouble()) {
+        _amountController.text = currentAmount.round().toString();
+      } else {
+        _amountController.text = currentAmount.toString();
+      }
     });
   }
 

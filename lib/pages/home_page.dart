@@ -1,11 +1,10 @@
-// lib/pages/home_page.dart (COMPLETE CODE)
 import 'package:exnote/pages/add_expense_modal.dart';
 import 'package:exnote/pages/notes_page.dart';
 import 'package:exnote/pages/planner_page.dart';
 import 'package:exnote/pages/statistics_page.dart';
 import 'package:exnote/providers/expense_provider.dart';
 import 'package:exnote/widgets/custom_drawer.dart';
-import 'package:exnote/widgets/expense_bar_chart.dart';
+import 'package:exnote/widgets/expense_bar_chart.dart'; // REQUIRED IMPORT
 import 'package:exnote/widgets/expense_item_card.dart';
 import 'package:exnote/widgets/upcoming_notes_carousel.dart';
 import 'package:flutter/material.dart';
@@ -184,13 +183,34 @@ class _HomeContent extends StatelessWidget {
             // 1. Upcoming Notes Carousel (Requires NoteProvider data)
             const UpcomingNotesCarousel(),
 
-            // 2. Bar Graph for Daily/Weekly/Monthly Expenses
+            // 2. Bar Graph for Daily/Weekly/Monthly Expenses (NEW ADDITION)
             Padding(
               padding: const EdgeInsets.symmetric(
                 horizontal: 16.0,
                 vertical: 8.0,
               ),
-              child: ExpenseBarChart(),
+              child: Card(
+                child: Padding(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Recent Spending Trend',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const Divider(),
+                      const SizedBox(
+                        height: 200, // Reduced height for home page widget
+                        // Defaulting to weekly comparison for recent trend
+                        child: ExpenseBarChart(
+                          initialFilter: BarChartFilter.weekly,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ),
 
             // 3. Expenses List Header
