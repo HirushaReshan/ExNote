@@ -85,7 +85,7 @@ class InstructionPage extends StatelessWidget {
               icon: Icons.web,
               title: 'More Information and Updates',
               content:
-                  'Visit https://github.com/HirushaReshan/ExNote for new updates.',
+                  'Visit https://github.com/HirushaReshan/ExNote for new updates. And more Information',
               onTap: () =>
                   _launchUrl(), // Wrap in a function call to ensure it's not const
             ),
